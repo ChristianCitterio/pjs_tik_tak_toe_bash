@@ -32,7 +32,7 @@ get_counter () {
 }
 
 save_game_and_exit () {
-    . "${PATH_TO_SAVE}" "$TAB"
+    . "${PATH_TO_SAVE}" "$TAB" "./saved_pvp_game.txt"
     IS_GAME_FINISH=true
     sleep 1s
 }
@@ -87,7 +87,7 @@ get_input () {
     then
         echo "Are you sure you want to save and exit the game?(y/n) "
         read -r response
-        if [[ $response == "y" ]];
+        if [[ $response == "y" || $response == "Y" ]];
         then
             echo "Saving the current game and exit"
             save_game_and_exit
