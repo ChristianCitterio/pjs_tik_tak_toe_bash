@@ -1,4 +1,7 @@
-TAB=(" " " " " " " " " " " " " " " " " ")
+#!bin/bash
+TAB=
+RESUME=false
+CHECK_LOOP=false
 
 continue_to_play () {
     echo "Do you want to continue to play?(y/n) "
@@ -19,30 +22,38 @@ resume_game () {
         read -r response
         if [[ $response == "y" || $response == "Y" ]];
         then
-            return 1
+            echo "loading game..."
+            RESUME=true
         elif [[ $response ==  "n" || $response == "N" ]];
         then
-            return 0
+            echo "Starting a new game..."
+            RESUME=false
         else
             echo "Not valid value"
-            return $(resume_game)
         fi
     else
         echo "No saved game present"
-        return 0
+        echo "Starting a new game..."
+        RESUME=false
     fi
 }
 
-while true;
-do
-    resume=$(resume_game)
-    if ! [[ resume == 1 ]];
-    then 
-        . "./tick_tack_toe.sh" "./save_game.sh" "${TAB}"
-    else
-        IFS=$'\r\n' GLOBIGNORE='*' command eval  '${TAB}=($(cat "./saved_game.txt"))'
-        echo $TAB
-        . "./tick_tack_toe.sh" "./save_game.sh" "${TAB}"
-    fi
-    continue_to_play
-done
+main () {
+    while ! $CHECK_LOOP;
+    do
+        resume_game
+        sleep 1s
+        if ! $RESUME;
+        then 
+            TAB=(" " " " " " " " " " " " " " " " " ")
+            source "./tick_tack_toe.sh" "./save_game.sh" "${TAB}"
+        else
+            IFS=$'\r\n' GLOBIGNORE='*' command eval  'TAB=($(cat "./saved_game.txt"))'
+            rm -r "./saved_game.txt"
+            source "./tick_tack_toe.sh" "./save_game.sh" "${TAB}"
+        fi
+        continue_to_play
+    done
+}
+
+main && exit 0
